@@ -24,7 +24,7 @@
           <label for="text">Text</label>
         </div>
         <div class="input-field">
-          <button class="btn waves-effect waves-light" type="submit" name="action">Submit
+          <button id="addItem" class="btn waves-effect waves-light" type="submit" name="action">Submit
             <i class="material-icons right">send</i>
           </button>
         </div>
@@ -36,9 +36,10 @@
           <tr>
             <th>Text</th>
             <th>Is Done</th>
+            <th>Delete</th>
           </tr>
         </thead>
-        <tbody id = 'items'>
+        <tbody id='items'>
         </tbody>
       </table>
     </div>
@@ -52,9 +53,12 @@
       document.getElementById('items').innerHTML = ''
       items.forEach(item => {
         let itemElem = document.createElement('tr')
+        itemElem.id = `item-${item.id}`
+        itemElem.dataset.isdone = item.isDone
         itemElem.innerHTML = `
         <td>${item.text}</td>
         <td>${item.isDone ? 'True' : 'False'}</td>
+        <td><i class="material-icons center deleteItem" data-id = ${item.id}>send</i></td>
         `
         document.getElementById('items').append(itemElem)
       })
@@ -67,6 +71,51 @@
         })
         .catch(e => console.log(e))
     }
+
+    const addItem = item => {
+      axios.post('/items', item)
+        .then(_ => {
+          getItems()
+        })
+        .catch(e => console.log(e))
+    }
+
+    const deleteItem = id => {
+      axios.delete(`/items/${id}`)
+        .then(_ => {
+          getItems()
+        })
+        .catch(e => console.log(e))
+    }
+
+    document.getElementById('addItem').addEventListener('click', e => {
+      e.preventDefault()
+      addItem({
+        text: document.getElementById('text').value,
+        isDone: false
+      })
+      document.getElementById('text').value = ''
+    })
+
+    const updateItem = (id, isDone) => {
+      axios.put(`/items/${id}`, isDone)
+        .then(_ => {
+          getItems()
+        })
+        .catch(e => console.catch(e))
+    }
+    document.addEventListener('click', e => {
+      if (e.target.classList.contains('deleteItem')) {
+        deleteItem(e.target.dataset.id)
+      } else if (e.target.tagName === 'TD') {
+        updateItem(e.target.parentNode.id.split('-')[1],
+          {
+            isDone:
+              e.target.parentNode.dataset.isdone === '0' ? true : false
+          }
+        )
+      }
+    })
 
     getItems()
   </script>
