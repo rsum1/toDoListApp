@@ -29,7 +29,6 @@ app.get('/items', (req, res) => {
 
 //POST one item
 app.post('/items', (req, res) => {
-  // console.log(req.body)
   db.query(`INSERT INTO items (text, isDone) VALUES("${req.body.text}", ${req.body.isDone})`, e => {
     if (e) {
       console.log(e)
@@ -40,12 +39,23 @@ app.post('/items', (req, res) => {
 
 //PUT one item
 app.put('/items/:hotdog', (req, res) => {
-  res.send('PUT one item')
+  db.query(`UPDATE items SET isDone = ${req.body.isDone} 
+  WHERE id = ${parseInt(req.params.hotdog)}`, e => {
+    if (e) {
+      console.log(e)
+    }
+    res.sendStatus(200)
+  })
 })
 
 //DELETE one item
 app.delete('/items/:hotdog', (req, res) => {
-  res.send('DELETE one item')
+  db.query(`DELETE FROM items WHERE id = ${parseInt(req.params.hotdog)}`, e => {
+    if (e) {
+      console.log(e)
+    }
+    res.sendStatus(200)
+  })
 })
 
 app.listen(3000)
